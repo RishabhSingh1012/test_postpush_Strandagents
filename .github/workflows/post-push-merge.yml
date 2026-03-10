@@ -1,0 +1,40 @@
+name: Post-Push Gate (Merge)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  post-push-gate-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run post-push gate
+        run: |
+          ./tools/post-push-gate full \
+            --task-id "MERGE-${{ github.sha }}" \
+            --sha "${{ github.sha }}" \
+            --runtime-id "${{ github.run_id }}"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-push-merge-artifacts-${{ github.run_id }}
+          path: artifacts/**
+          if-no-files-found: ignore

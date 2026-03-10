@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Usage:
+#   ./tools/post-push-gate <profile> [guardrails post-push flags...]
+#   POST_PUSH_PROFILE=full ./tools/post-push-gate [flags...]
+
+profile="${POST_PUSH_PROFILE:-light}"
+
+if [[ $# -gt 0 ]]; then
+  case "$1" in
+    light|full)
+      profile="$1"
+      shift
+      ;;
+  esac
+fi
+
+has_profile_flag=0
+for arg in "$@"; do
+  if [[ "$arg" == "--profile" ]]; then
+    has_profile_flag=1
+    break
+  fi
+done
+
+cmd=(python -m guardrails post-push)
+if [[ "$has_profile_flag" -eq 0 ]]; then
+  cmd+=(--profile "$profile")
+fi
+cmd+=("$@")
+
+if [[ -n "${PYTHONPATH:-}" ]]; then
+  exec env PYTHONPATH="src:${PYTHONPATH}" "${cmd[@]}"
+fi
+exec env PYTHONPATH="src" "${cmd[@]}"

@@ -30,6 +30,8 @@ classifiers = [
 dependencies = [
     "boto3>=1.26.0,<2.0.0",
     "botocore>=1.29.0,<2.0.0",
+    "click>=8.0,<9.0.0",
+    "beartype>=0.16,<1.0.0",
     "docstring_parser>=0.15,<1.0",
     "jsonschema>=4.0.0,<5.0.0",
     "mcp>=1.23.0,<2.0.0",
@@ -106,8 +108,12 @@ Homepage = "https://github.com/strands-agents/sdk-python"
 Documentation = "https://strandsagents.com"
 
 
+[project.scripts]
+guardrails = "guardrails.cli:main"
+
+
 [tool.hatch.build.targets.wheel]
-packages = ["src/strands"]
+packages = ["src/strands", "src/guardrails"]
 
 
 [tool.hatch.version]
